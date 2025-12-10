@@ -34,9 +34,15 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $e)
     {
         if ($request->expectsJson()) {
-            if ($e instanceof NotFoundHttpException || $e instanceof ModelNotFoundException) {
+            if ($this->isModelNotFound($e)) {
                 return response()->json([
-                    'message' => 'Resource not found',
+                    'message' => 'Registro não encontrado',
+                ], 404);
+            }
+
+            if ($e instanceof NotFoundHttpException) {
+                return response()->json([
+                    'message' => 'Recurso não encontrado',
                 ], 404);
             }
 
@@ -46,5 +52,18 @@ class Handler extends ExceptionHandler
         }
 
         return parent::render($request, $e);
+    }
+
+    /**
+     * Checks if the exception came from an Eloquent model lookup.
+     */
+    private function isModelNotFound(Throwable $e): bool
+    {
+        if ($e instanceof ModelNotFoundException) {
+            return true;
+        }
+
+        return $e instanceof NotFoundHttpException
+            && $e->getPrevious() instanceof ModelNotFoundException;
     }
 }

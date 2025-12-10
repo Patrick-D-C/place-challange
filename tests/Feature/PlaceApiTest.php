@@ -121,7 +121,23 @@ class PlaceApiTest extends TestCase
         $response = $this->getJson('/api/places/999');
 
         $response->assertNotFound()
-            ->assertJsonPath('message', 'Resource not found');
+            ->assertJsonPath('message', 'Registro não encontrado');
+    }
+
+    public function test_returns_404_for_missing_place_by_slug(): void
+    {
+        $response = $this->getJson('/api/places/slug/inexistente');
+
+        $response->assertNotFound()
+            ->assertJsonPath('message', 'Registro não encontrado');
+    }
+
+    public function test_returns_resource_not_found_for_invalid_route(): void
+    {
+        $response = $this->getJson('/api/nao-existe');
+
+        $response->assertNotFound()
+            ->assertJsonPath('message', 'Recurso não encontrado');
     }
 
     public function test_finds_place_by_slug(): void
